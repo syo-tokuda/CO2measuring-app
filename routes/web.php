@@ -4,9 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MeasuringController;
 
 
-Route::get('/', function () {
+Route::get('/a', function () {
     return view('welcome');
 });
 
-Route::get('measuring',[MeasuringController::class,'index']);
-Route::post('measuring',[MeasuringController::class,'store'])->name('user.profile');
+Route::get('/',[MeasuringController::class,'index']);
+Route::post('/re',[MeasuringController::class,'store'])->name('user.profile');

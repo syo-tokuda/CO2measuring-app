@@ -64,16 +64,16 @@ class MeasuringController extends Controller
             if ($timewidth=="day"){
                 $fromtime = 0;
                 $totime = $_POST['totime'];
-                if ($totime!=null) 
+                if ($totime!=null)
                     $totime *= 24;
             }
             else {
                 $fromtime = $_POST['fromtime'];
                 $totime = $_POST['totime'];
             }
-            if ($fromtime==null) 
+            if ($fromtime==null)
                 $fromtime = 0;
-            if ($totime==null) 
+            if ($totime==null)
                 $totime = 0;
         }
         $pythonPath =  "../app/Python/";

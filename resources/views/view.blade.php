@@ -66,8 +66,8 @@
         var chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: @json($labels),         
-                datasets: [       
+                labels: @json($labels),
+                datasets: [
                 {
                     label: 'CO2_lifting [ppm]',
                     data: @json($CO2_lifting),
@@ -173,7 +173,7 @@
                         position: 'right',
                         beginAtZero: true,
                         grid: {
-				            drawOnChartArea: false, 
+				            drawOnChartArea: false,
 			            },
                         title: {
                             display: true,
