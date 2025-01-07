@@ -30,8 +30,13 @@ class MeasuringController extends Controller
         exec($command , $CO2_top);
         $command = "python2 " . $pythonPath . "CdS.py " . $datecount . " " . $fromtime . " " . $totime;
         exec($command , $CdS);
-        
-        return view('view', compact('labels', 'temperature', 'humidity', 'height', 'CO2_lifting', 'CO2_bottom', 'CO2_top', 'CdS', 'datecount', 'date', 'timewidth', 'fromtime', 'totime'));
+        $command = "python2 " . $pythonPath . "lastdata.py";
+        exec($command , $last);
+        foreach($last as $ldata)
+            $lastdata = $ldata;
+        $lastdata = mb_strstr($lastdata, '+', true);
+
+        return view('view', compact('labels', 'temperature', 'humidity', 'height', 'CO2_lifting', 'CO2_bottom', 'CO2_top', 'CdS', 'datecount', 'date', 'timewidth', 'fromtime', 'totime', 'lastdata'));
     }
 
     public function store(Request $request)
@@ -64,16 +69,16 @@ class MeasuringController extends Controller
             if ($timewidth=="day"){
                 $fromtime = 0;
                 $totime = $_POST['totime'];
-                if ($totime!=null)
+                if ($totime!=null) 
                     $totime *= 24;
             }
             else {
                 $fromtime = $_POST['fromtime'];
                 $totime = $_POST['totime'];
             }
-            if ($fromtime==null)
+            if ($fromtime==null) 
                 $fromtime = 0;
-            if ($totime==null)
+            if ($totime==null) 
                 $totime = 0;
         }
         $pythonPath =  "../app/Python/";
@@ -93,9 +98,14 @@ class MeasuringController extends Controller
         exec($command , $CO2_top);
         $command = "python2 " . $pythonPath . "CdS.py " . $datecount . " " . $fromtime . " " . $totime;
         exec($command , $CdS);
+        $command = "python2 " . $pythonPath . "lastdata.py";
+        exec($command , $last);
+        foreach($last as $ldata)
+            $lastdata = $ldata;
+        $lastdata = mb_strstr($lastdata, '+', true);
         $date_plusday = $datecount . " day";
         $date = date('Y-m-d', strtotime($date_plusday));
-        
-        return view('view', compact('labels', 'temperature', 'humidity', 'height', 'CO2_lifting', 'CO2_bottom', 'CO2_top', 'CdS', 'datecount', 'date', 'timewidth', 'fromtime', 'totime'));
+
+        return view('view', compact('labels', 'temperature', 'humidity', 'height', 'CO2_lifting', 'CO2_bottom', 'CO2_top', 'CdS', 'datecount', 'date', 'timewidth', 'fromtime', 'totime', 'lastdata'));
     }
 }

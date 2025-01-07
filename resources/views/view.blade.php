@@ -1,3 +1,11 @@
+<?php
+function is_mobile()
+{
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+    return preg_match('/iphone|ipod|android/ui', $user_agent) != 0;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,13 +18,43 @@
 <body class="flex flex-col min-h-[100vh]">
     <header class="bg-slate-800">
         <div class="max-w-7xl mx-auto">
+            @if (is_mobile())
+            <div class="py-0">
+                <p class="text-white text-xl">計測データ観測アプリ　　　　　最終データ：{{$lastdata}}</p>
+            </div>
+            @else
             <div class="py-6">
                 <p class="text-white text-2xl">計測データ観測アプリ</p>
             </div>
+            @endif
         </div>
     </header>
     <div class="mx-auto">
-         <div class="py-4">
+        @if (is_mobile())
+        <form action="{{ route('user.profile', ['datecount' => $datecount, 'timewidth' => $timewidth]) }}" method="post">
+            @csrf
+            <p class="text-black text-l">{{$date}}　
+                @if ($timewidth=="day")
+                @php
+                $todate = $totime/24;
+                @endphp
+                0時から
+                <input type="number" min="0" value="{{$todate}}" class="w-12 h-6 border border-neutral-400" name="totime">
+                日間　　
+                @else
+                <input type="number" min="0" max="23" value="{{$fromtime}}" class="w-12 h-6 border border-neutral-400" name="fromtime">
+                時から
+                <input type="number" min="0" value="{{$totime}}" class="w-12 h-6 border border-neutral-400" name="totime">
+                時間　　
+                @endif
+                <button class="mt-1 p-1 bg-emerald-600 text-white" name="day" type="submit">日単位に切り替え</button>
+                @else
+                <button class="mt-1 p-1 bg-emerald-600 text-white" name="hour" type="submit">時間単位に切り替え</button>
+                @endif
+            </p>
+        </form>
+        @else
+        <div class="py-4">
             <form action="{{ route('user.profile', ['datecount' => $datecount, 'timewidth' => $timewidth]) }}" method="post">
                 @csrf
                 <p class="text-black text-xl">{{$date}}　
@@ -25,28 +63,41 @@
                     $todate = $totime/24;
                     @endphp
                     0時から
-                    <input type="number" min="0" value="{{$todate}}" class="w-12 border border-neutral-400" name="totime">
+                    <input type="number" min="0" max="99" value="{{$todate}}" class="w-14 h-8 border border-neutral-400" name="totime">
                     日間　　
                     @else
-                    <input type="number" min="0" max="23" value="{{$fromtime}}" class="w-12 border border-neutral-400" name="fromtime">
+                    <input type="number" min="0" max="23" value="{{$fromtime}}" class="w-14 h-8 border border-neutral-400" name="fromtime">
                     時から
-                    <input type="number" min="0" value="{{$totime}}" class="w-12 border border-neutral-400" name="totime">
+                    <input type="number" min="0" max="99" value="{{$totime}}" class="w-14 h-8 border border-neutral-400" name="totime">
                     時間　　
                     @endif
-                    
+
                     <button class="mt-1 p-1 bg-indigo-700 text-white" name="update" type="submit">更新</button>
                     @if ($timewidth == "hour")
                     <button class="mt-1 p-1 bg-emerald-600 text-white" name="day" type="submit">日単位に切り替え</button>
                     @else
                     <button class="mt-1 p-1 bg-emerald-600 text-white" name="hour" type="submit">時間単位に切り替え</button>
                     @endif
+                    　最終データ：{{$lastdata}}
                 </p>
             </form>
         </div>
+        @endif
     </div>
 
-    <div style="width: 60%" class="mx-auto flex">
-        <canvas id="chart"></canvas>
+    @if (is_mobile())
+    <div style="width: 80%" class="mx-auto flex">
+        <canvas id="chart" width="100" height="50"></canvas>
+        <button id="reset" class="h-12 bg-orange-500 text-white" onclick="reset()">reset zoom</button>
+        <script>
+            function reset() {
+                chart.resetZoom();
+            }
+        </script>
+    </div>
+    @else
+    <div style="width: 70%" class="mx-auto flex">
+        <canvas id="chart" width="100" height="50"></canvas>
         <button id="reset" class="p-1 h-8 whitespace-nowrap bg-orange-500 text-white" onclick="reset()">reset zoom</button>
         <script>
             function reset() {
@@ -54,6 +105,7 @@
             }
         </script>
     </div>
+    @endif
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.5.0/dist/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.js"></script>
@@ -66,8 +118,8 @@
         var chart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: @json($labels),
-                datasets: [
+                labels: @json($labels),         
+                datasets: [       
                 {
                     label: 'CO2_lifting [ppm]',
                     data: @json($CO2_lifting),
@@ -173,8 +225,8 @@
                         position: 'right',
                         beginAtZero: true,
                         grid: {
-				            drawOnChartArea: false,
-			            },
+                                            drawOnChartArea: false, 
+                                    },
                         title: {
                             display: true,
                             text: 'Height [mm]',
@@ -205,6 +257,16 @@
     <div class="mx-auto">
         <form action="{{ route('user.profile', ['datecount' => $datecount, 'timewidth' => $timewidth, 'fromtime'=>$fromtime, 'totime'=>$totime]) }}" method="post">
         @csrf
+            @if (is_mobile())
+            <div class="px-4 sm:px-6 text-l">
+                <button class="p-1 bg-rose-800 text-white" name="onemonth_before" type="submit">1ヵ月戻る</button>
+                <button class="p-1 bg-rose-600 text-white" name="oneweek_before" type="submit">1週間戻る</button>
+                <button class="p-1 bg-rose-400 text-white" name="oneday_before" type="submit">1日戻る</button>
+                <button class="p-1 bg-sky-400 text-white" name="oneday_after" type="submit">1日進む</button>
+                <button class="p-1 bg-sky-600 text-white" name="oneweek_after" type="submit">1週間進む</button>
+                <button class="p-1 bg-sky-800 text-white" name="onemonth_after" type="submit">1ヵ月進む</button>
+            </div>
+            @else
             <div class="px-4 sm:px-6 text-xl">
                 <button class="p-1 bg-rose-800 text-white" name="onemonth_before" type="submit">1ヵ月戻る</button>
                 <button class="p-1 bg-rose-600 text-white" name="oneweek_before" type="submit">1週間戻る</button>
@@ -213,6 +275,7 @@
                 <button class="p-1 bg-sky-600 text-white" name="oneweek_after" type="submit">1週間進む</button>
                 <button class="p-1 bg-sky-800 text-white" name="onemonth_after" type="submit">1ヵ月進む</button>
             </div>
+            @endif
         </form>
     </div>
 </body>
