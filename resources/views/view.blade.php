@@ -174,6 +174,14 @@ function is_mobile()
                         titleColor: 'black',
                         bodyColor: 'black',
                     },
+                    legend: {
+                        labels: {
+                            @if (is_mobile())
+                            boxWidth: 8,
+                            boxHeight: 8,
+                            @endif
+                        },
+                    },
                     zoom: {
                         zoom: {
                         wheel: {
